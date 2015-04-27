@@ -3,6 +3,8 @@
 #define IMMUTABLE_LIST_H
 
 #include <gio/gio.h>
+#include <string.h>
+#include <stdio.h>
 
 #include "immutable-types.h"
 
@@ -25,6 +27,24 @@ struct _ImmutableListClass {
 };
 
 GType immutable_list_get_type (void) G_GNUC_CONST;
+
+gboolean
+immutable_list_is_empty (ImmutableList *list);
+
+ImmutableList*
+immutable_list_cons (char *head, ImmutableList *tail);
+
+int
+immutable_list_get_length (ImmutableList *list);
+
+char*
+immutable_list_head (ImmutableList *list);
+
+char*
+immutable_list_to_string (ImmutableList *list);
+
+ImmutableList*
+immutable_list_tail (ImmutableList *list);
 
 #endif /* IMMUTABLE_LIST_H */
 
