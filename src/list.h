@@ -46,5 +46,8 @@ immutable_list_to_string (ImmutableList *list);
 ImmutableList*
 immutable_list_tail (ImmutableList *list);
 
+ImmutableList*
+immutable_list_append (ImmutableList *list_x, ImmutableList *list_y);
+
 #endif /* IMMUTABLE_LIST_H */
 

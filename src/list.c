@@ -51,7 +51,8 @@ immutable_list_init (ImmutableList *list)
 gboolean
 immutable_list_is_empty (ImmutableList *list)
 {
-  g_assert (list != NULL);
+  if (list == NULL)
+    return TRUE;
 
   ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
   return (priv->value == NULL);
@@ -83,8 +84,6 @@ immutable_list_cons (char *head, ImmutableList *tail)
 int
 immutable_list_get_length (ImmutableList *list)
 {
-  g_assert (list != NULL);
-
   ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
 
   if (immutable_list_is_empty (list))
@@ -104,35 +103,12 @@ immutable_list_get_length (ImmutableList *list)
 char*
 immutable_list_head (ImmutableList *list)
 {
-  g_assert (list != NULL);
-
   ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
-  return strdup(priv->value);
-}
 
-char*
-immutable_list_to_string (ImmutableList *list)
-{
-  g_assert (list != NULL);
-  GString *str;
-  char *out;
-
-  str = g_string_sized_new(40);
-
-  ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
-  g_string_append(str, "(");
   if (priv->value == NULL)
-    g_string_append(str, "NULL");
-  else
-    g_string_append_printf(str, "\"%s\"", priv->value);
+    return NULL;
 
-  if (priv->tail != NULL)
-    g_string_append_printf(str, " cons %s", immutable_list_to_string(priv->tail));
-
-  g_string_append(str, ")");
-
-  out = str->str;
-  return out;
+  return strdup(priv->value);
 }
 
 /**
@@ -144,8 +120,56 @@ immutable_list_to_string (ImmutableList *list)
 ImmutableList*
 immutable_list_tail (ImmutableList *list)
 {
-  g_assert (list != NULL);
+  ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
+
+  if (priv->tail == NULL)
+    return NULL;
+
+  g_object_ref (priv->tail);
+
+  return priv->tail;
+}
+
+/**
+ * immutable_list_append:
+ * @list_x:
+ * @list_y:
+ *
+ * Returns: (transfer full):
+ */
+ImmutableList*
+immutable_list_append (ImmutableList *list_x, ImmutableList *list_y)
+{
+  if (immutable_list_is_empty (list_x))
+    return list_y;
+
+  char *x;
+  ImmutableList *xs;
+
+  x = immutable_list_head (list_x);
+  xs = immutable_list_tail (list_x);
+
+  return immutable_list_cons (x, immutable_list_append (xs, list_y));
+}
+
+char*
+immutable_list_to_string (ImmutableList *list)
+{
+  GString *str;
+  char *out;
+
+  str = g_string_sized_new(40);
 
   ImmutableListPrivate *priv = immutable_list_get_instance_private (list);
-  return immutable_list_cons (priv->value, NULL);
+  g_string_append(str, "(");
+  if (priv->value != NULL)
+    g_string_append_printf(str, "\"%s\"", priv->value);
+
+  if (priv->tail != NULL)
+    g_string_append_printf(str, " %s", immutable_list_to_string(priv->tail));
+
+  g_string_append(str, ")");
+
+  out = str->str;
+  return out;
 }
